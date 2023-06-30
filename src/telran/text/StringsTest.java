@@ -108,4 +108,68 @@ class StringsTest {
 		assertFalse("1.2.3".matches(regex));
 		assertFalse("1.2.3.4.5".matches(regex));
 	}
+
+	@Test
+	void arithmeticExpressionTest() {
+		assertTrue(Strings.isArithmeticExpression(" 12 "));//12
+		assertTrue(Strings.isArithmeticExpression(" 12/ 6"));//2
+		assertTrue(Strings.isArithmeticExpression("12/2"));//6
+		assertTrue(Strings.isArithmeticExpression(" 12*  2 / 3 + 1000 "));//1008
+		assertTrue(Strings.isArithmeticExpression(" 120 / 50 + 100 - 2 * 3 / 500 "));//0
+		assertFalse(Strings.isArithmeticExpression(" 12 18"));
+		assertFalse(Strings.isArithmeticExpression(" 12/3&4"));
+		assertFalse(Strings.isArithmeticExpression(" 12+20-"));
+		assertFalse(Strings.isArithmeticExpression(" 12/ 18 + 100 10"));
+		
+		assertTrue(Strings.isArithmeticExpression(" 3.75 "));
+		assertTrue(Strings.isArithmeticExpression(" 3."));
+		assertFalse(Strings.isArithmeticExpression(" .75 "));
+		assertFalse(Strings.isArithmeticExpression(" ."));
+		assertFalse(Strings.isArithmeticExpression("."));
+		assertFalse(Strings.isArithmeticExpression(".3.5"));
+		assertFalse(Strings.isArithmeticExpression("3.75.43"));
+	}
+	
+	@Test
+	void computeExpressionTest() {
+		assertEquals(12, Strings.computeExpression(" 12 "));
+		assertEquals(2, Strings.computeExpression(" 12/ 6"));
+		assertEquals(6, Strings.computeExpression("12/2"));
+		assertEquals(1008, Strings.computeExpression(" 12*  2 / 3 + 1000 "));
+		assertEquals(0, Strings.computeExpression(" 120 / 50 + 100 - 2 * 3 / 500 "));
+		assertThrowsExactly(IllegalArgumentException.class,
+				() -> Strings.computeExpression(" 12/ 18 + 100 10"));
+	}
+
+	@Test
+	void computeDoubleExpressionTest() {
+		assertEquals(12, Strings.computeExpression(" 12 ", Strings.mapDoubleOperations));
+		assertEquals(2, Strings.computeExpression(" 12/ 6", Strings.mapDoubleOperations));
+		assertEquals(2, Strings.computeExpression(" 12/ 6.", Strings.mapDoubleOperations));
+		assertEquals(2, Strings.computeExpression(" 12./ 6", Strings.mapDoubleOperations));
+		assertEquals(2, Strings.computeExpression(" 12./6.", Strings.mapDoubleOperations));
+		assertEquals(2, Strings.computeExpression(" 12.0/6.0", Strings.mapDoubleOperations));
+		assertEquals(6, Strings.computeExpression("12/2", Strings.mapDoubleOperations));
+		assertEquals(1008, Strings.computeExpression(" 12*  2 / 3 + 1000 ", Strings.mapDoubleOperations));
+		assertEquals(0.6024, Strings.computeExpression(" 120 / 50 + 100 - 2 * 3 / 500 ", Strings.mapDoubleOperations));
+		assertEquals(1.35, Strings.computeExpression("0.35+0.45+0.55", Strings.mapDoubleOperations));
+		assertThrowsExactly(IllegalArgumentException.class,
+				() -> Strings.computeExpression(" 12/ 18 + 100 10"));
+	}
+
+	@Test
+	void arithmeticVarExpressionTest() {
+		assertTrue(Strings.isArithmeticExpression(" a12/ b6 "));
+		assertTrue(Strings.isArithmeticExpression("abc35/2"));
+		assertTrue(Strings.isArithmeticExpression(" a12 +8/ b6 "));
+		assertTrue(Strings.isArithmeticExpression(" $2+_18"));
+		assertTrue(Strings.isArithmeticExpression(" a_b+3.76"));
+		
+		assertFalse(Strings.isArithmeticExpression("35+7.6-1a+bb5"));
+		assertFalse(Strings.isArithmeticExpression("_/b8"));
+		assertFalse(Strings.isArithmeticExpression("a#+4   "));
+		assertFalse(Strings.isArithmeticExpression("  a# + 4   "));
+		assertFalse(Strings.isArithmeticExpression("a # + 4"));
+		assertFalse(Strings.isArithmeticExpression("7 *a b * 8"));
+	}
 }
